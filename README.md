@@ -74,6 +74,12 @@ http://localhost:3000
 
 ## 사이트 주소 디버깅 방법
 
+현재 프로덕션 배포 주소:
+
+```text
+https://wise-tsv-dashboard.vercel.app
+```
+
 ### 1. 전체 페이지 자동 점검
 
 개발 서버를 실행한 상태에서 새 터미널을 열고 다음 명령을 실행합니다.
@@ -91,6 +97,8 @@ pnpm check:site
 ```powershell
 pnpm check:site -- https://내-사이트.vercel.app
 ```
+
+현재 사이트는 Vercel의 `wise-tsv-dashboard` 프로젝트에 배포되어 있습니다. 이후 새 기능을 배포하면 같은 대표 주소에 최신 프로덕션 버전이 연결됩니다.
 
 또는 환경변수로 전달할 수 있습니다.
 
