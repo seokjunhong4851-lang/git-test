@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { dashboardMenus } from "../config/menu";
+import { RecentNotices } from "./RecentNotices";
 
 export function DashboardMenu() {
   const menus = dashboardMenus.filter((menu) => menu.enabled !== false);
@@ -18,6 +19,7 @@ export function DashboardMenu() {
           <span className="menu-arrow" aria-hidden="true">→</span>
         </Link>
       )}
+      <RecentNotices />
 
       <p className="section-label">TEAM MENU</p>
       <div className="menu-grid">
