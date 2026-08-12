@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
 
 type Notice = { id: string; title: string; createdAt: string; important?: boolean };
@@ -14,8 +13,6 @@ export function RecentNotices() {
     } catch { setNotices([]); }
   }, []);
 
-  return <section className="recent-notices" aria-label="최근 공지사항">
-    <div className="recent-notices-head"><strong>최근 공지</strong><Link href="/notices">전체 보기 →</Link></div>
-    {notices.length === 0 ? <p>아직 등록된 공지사항이 없습니다.</p> : <ol>{notices.map((notice) => <li key={notice.id}><Link href="/notices">{notice.important && <span>중요</span>}<b>{notice.title}</b></Link></li>)}</ol>}
-  </section>;
+  if (notices.length === 0) return null;
+  return <ul className="featured-recent" aria-label="최근 공지 제목">{notices.map((notice) => <li key={notice.id}>{notice.important && <b>중요</b>}<span>{notice.title}</span></li>)}</ul>;
 }

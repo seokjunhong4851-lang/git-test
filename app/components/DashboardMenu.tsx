@@ -15,12 +15,11 @@ export function DashboardMenu() {
           <span>
             <strong>{featuredMenu.title}</strong>
             <small>{featuredMenu.description}</small>
+            <RecentNotices />
           </span>
           <span className="menu-arrow" aria-hidden="true">→</span>
         </Link>
       )}
-      <RecentNotices />
-
       <p className="section-label">TEAM MENU</p>
       <div className="menu-grid">
         {standardMenus.map((menu) => (
