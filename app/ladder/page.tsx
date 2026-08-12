@@ -1,4 +1,2 @@
-import { FeaturePlaceholder } from "../components/FeaturePlaceholder";
-export default function LadderPage() {
-  return <FeaturePlaceholder icon="🪜" title="근무표 사다리" description="팀 근무 순서를 쉽고 공정하게 정하는 공간입니다." />;
-}
+import { SimpleListFeature } from "../components/SimpleListFeature";
+export default function LadderPage() { return <SimpleListFeature storageKey="tsv-ladder-members" icon="🪜" title="근무표 사다리" description="사다리 추첨에 참여할 멤버와 조건을 관리합니다." addLabel="참여자 추가" nameLabel="참여자 이름" detailLabel="근무 조건 또는 메모" />; }
