@@ -9,7 +9,7 @@ import { EventInput } from "@fullcalendar/core";
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { FeatureLayout } from "../components/FeatureLayout";
 import { Modal } from "../components/Modal";
-import { StoredItem, useLocalCollection } from "../hooks/useLocalCollection";
+import { StoredItem, useSharedCollection } from "../hooks/useSharedCollection";
 
 type Member = StoredItem & { name: string; role: string; email: string; annualLeave: number };
 type Schedule = StoredItem & { memberId: string; memberName: string; type: "연차" | "근무" | "GY" | "기타"; start: string; end: string; memo: string };
@@ -22,8 +22,8 @@ function monthValue(date: Date) {
 
 export function AttendanceCalendar() {
   const calendarRef = useRef<FullCalendar>(null);
-  const members = useLocalCollection<Member>("tsv-members");
-  const schedules = useLocalCollection<Schedule>("tsv-schedules");
+  const members = useSharedCollection<Member>("tsv-members");
+  const schedules = useSharedCollection<Schedule>("tsv-schedules");
   const [holidays, setHolidays] = useState<Holiday[]>([]);
   const [currentMonth, setCurrentMonth] = useState(monthValue(new Date()));
   const [open, setOpen] = useState(false);

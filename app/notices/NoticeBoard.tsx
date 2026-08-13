@@ -2,10 +2,10 @@
 import { FormEvent, useEffect, useState } from "react";
 import { FeatureLayout } from "../components/FeatureLayout";
 import { Modal } from "../components/Modal";
-import { StoredItem, useLocalCollection } from "../hooks/useLocalCollection";
+import { StoredItem, useSharedCollection } from "../hooks/useSharedCollection";
 type Notice = StoredItem & { title: string; content: string; author: string; important: boolean };
 export function NoticeBoard() {
-  const store = useLocalCollection<Notice>("tsv-notices"); const [open, setOpen] = useState(false);
+  const store = useSharedCollection<Notice>("tsv-notices"); const [open, setOpen] = useState(false);
   useEffect(() => { if (!store.ready || !window.location.hash) return; window.setTimeout(() => document.querySelector(window.location.hash)?.scrollIntoView({ behavior: "smooth", block: "center" }), 50); }, [store.ready, store.items]);
   function submit(event: FormEvent<HTMLFormElement>) { event.preventDefault(); const data = new FormData(event.currentTarget); store.add({ title: String(data.get("title")), content: String(data.get("content")), author: String(data.get("author")), important: data.get("important") === "on" }); setOpen(false); }
   return <FeatureLayout icon="📢" title="공지사항" description="새로운 소식과 꼭 확인해야 할 내용을 공유합니다." action={<button className="primary-button" onClick={() => setOpen(true)}>＋ 새 공지 추가</button>}>

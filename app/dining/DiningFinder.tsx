@@ -3,7 +3,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { FeatureLayout } from "../components/FeatureLayout";
 import { Modal } from "../components/Modal";
-import { StoredItem, useLocalCollection } from "../hooks/useLocalCollection";
+import { StoredItem, useSharedCollection } from "../hooks/useSharedCollection";
 
 const categories = [{ name: "한식", icon: "🍚" }, { name: "중식", icon: "🥟" }, { name: "일식", icon: "🍣" }, { name: "양식", icon: "🍝" }, { name: "기타", icon: "🍽️" }];
 const CENTER = { lat: 37.2188, lng: 127.0772 };
@@ -11,7 +11,7 @@ type Place = { id: string; place_name: string; category_name: string; road_addre
 type Candidate = StoredItem & { name: string; category: string; detail: string; url: string };
 
 export function DiningFinder() {
-  const candidates = useLocalCollection<Candidate>("tsv-dining-places");
+  const candidates = useSharedCollection<Candidate>("tsv-dining-places");
   const [category, setCategory] = useState("한식"); const [places, setPlaces] = useState<Place[]>([]); const [configured, setConfigured] = useState<boolean | null>(null); const [loading, setLoading] = useState(false); const [manualOpen, setManualOpen] = useState(false);
   useEffect(() => { setLoading(true); fetch(`/api/restaurants?category=${encodeURIComponent(category)}`).then((response) => response.json()).then((data) => { setPlaces(data.places || []); setConfigured(Boolean(data.configured)); }).catch(() => { setPlaces([]); setConfigured(false); }).finally(() => setLoading(false)); }, [category]);
   const query = encodeURIComponent(`삼성전자 화성캠퍼스 H3정문 ${category} 맛집`);

@@ -1,204 +1,165 @@
 # 슬기로운 TSV 생활
 
-TSV 팀이 공지사항, 멤버 정보, 근태 일정, 근무표 추첨 대상과 회식 장소를 함께 관리하기 위한 대시보드입니다.
+팀원들이 공지사항, 멤버, 근태 일정, 회식 후보를 함께 관리하는 Next.js 대시보드입니다. 코드는 GitHub에 보관하고, Vercel에서 웹사이트를 실행하며, 사용자가 입력한 데이터는 Supabase에 공동 저장합니다.
 
-이 README는 코딩을 처음 접하는 사람도 프로젝트를 실행하고 수정할 수 있도록 한글로 작성합니다. 기능 또는 구조를 바꿀 때는 코드와 함께 이 문서도 갱신합니다.
+## 서비스 구성
 
-## 현재 구현된 기능
+```text
+로컬 PC의 코드 → GitHub → Vercel 자동 배포
+                         ↕
+                  Supabase 공동 데이터
+```
 
-- 홈에서 다섯 개 메뉴 페이지로 이동
-- 모든 하위 페이지에서 `메인으로 돌아가기` 지원
-- 공지사항 추가와 삭제
-- 그룹 멤버 추가와 삭제, 연간 연차 개수 등록
-- FullCalendar 기반 월간 근태캘린더
-- 연차, 근무, GY, 기타 일정 추가와 삭제
-- 멤버별 사용·잔여 연차 현황
-- 조회하는 연도의 대한민국 공휴일 자동 표시
-- 토요일 파란색·일요일 및 공휴일 빨간색 구분
-- 월 선택 입력을 통한 원하는 연·월 즉시 이동
-- 근무표 사다리 참여자 추가와 삭제
-- 실제 사다리 경로 애니메이션과 당첨 인원 선택
-- 게임 종료 전 결과 숨김, 결과 공개 및 공유
-- 회식 장소 후보 추가와 삭제
-- H3 Gate 기준 지도와 음식 종류별 주변 맛집 검색
-- 네이버지도·카카오맵 검색 연결 및 팀 후보 저장
-- 로컬 주소 또는 배포 주소의 전체 페이지 자동 점검
+- GitHub: 코드 변경 이력과 백업
+- Vercel: 사이트 빌드와 배포
+- Supabase: 공지, 멤버, 근태, 회식 후보 데이터 저장
+- 브라우저 `localStorage`: Supabase 환경 변수가 없을 때만 개발용 임시 저장
 
-## 꼭 알아둘 점
+## 구현된 기능
 
-현재 입력 데이터는 **개발 단계의 브라우저 저장소**에 보관됩니다. 따라서 같은 컴퓨터와 브라우저에서는 새로고침 후에도 남지만 다른 팀원의 컴퓨터와 공유되지는 않습니다.
-
-팀 전체의 공동 저장은 다음 단계에서 Supabase를 연결해 완성합니다. 실제 외부 배포 전에는 Supabase 데이터베이스와 최소한의 편집 권한 보호도 반드시 추가해야 합니다.
+- 공지사항 추가·삭제 및 메인 화면 최근 공지 3개 연결
+- 멤버 추가·삭제와 연간 연차 관리
+- FullCalendar 기반 근태 일정 추가·삭제
+- 토요일 파란색, 일요일·공휴일 빨간색 표시
+- 연차·근무·GY·기타 일정 색상 구분
+- 실제 사다리 모양의 근무표 사다리 게임
+- H3 Gate 주변 음식점 검색과 회식 후보 공동 저장
+- 모든 하위 페이지의 `메인으로 돌아가기` 이동
+- 서로 다른 PC와 브라우저 사이의 Supabase 실시간 동기화
+- 기존 브라우저 저장 데이터를 Supabase로 자동 이전
 
 ## 폴더 구조
 
 ```text
 dashboard/
 ├─ app/
-│  ├─ page.tsx                         # 홈 요약 화면
-│  ├─ config/menu.ts                   # 홈 메뉴의 이름·아이콘·주소 관리
-│  ├─ components/                      # 여러 페이지가 함께 쓰는 화면 부품
-│  ├─ hooks/useLocalCollection.ts      # 개발용 브라우저 저장 기능
-│  ├─ notices/                         # 공지사항 기능
-│  ├─ members/                         # 멤버 관리 기능
-│  ├─ attendance/                      # 근태캘린더 기능
-│  ├─ ladder/                          # 근무표 사다리 기능
-│  ├─ dining/                          # 회식 장소 기능
-│  └─ api/holidays/[year]/route.ts     # 연도별 한국 공휴일 조회
-├─ scripts/check-site.mjs              # 사이트 주소 자동 점검
-├─ public/                              # 이미지와 공개 파일
-├─ package.json                         # 실행 명령과 설치 패키지
-└─ README.md                            # 현재 문서
+│  ├─ page.tsx                       # 메인 요약 화면
+│  ├─ config/menu.ts                 # 메뉴 이름·아이콘·링크 설정
+│  ├─ components/                    # 공통 화면 부품
+│  ├─ hooks/useSharedCollection.ts   # Supabase 공동 CRUD와 자동 이전
+│  ├─ lib/supabase.ts                # Supabase 클라이언트 생성
+│  ├─ notices/                       # 공지사항
+│  ├─ members/                       # 멤버 관리
+│  ├─ attendance/                    # 근태 캘린더
+│  ├─ ladder/                        # 사다리 게임
+│  ├─ dining/                        # 회식 장소
+│  └─ api/                           # 공휴일·음식점 서버 API
+├─ supabase/schema.sql               # 데이터베이스 구조와 보안 정책 백업
+├─ scripts/check-site.mjs            # 배포 주소 자동 점검
+├─ .env.example                      # 환경 변수 이름 예시
+└─ README.md
 ```
-
-Python의 `app.py`처럼 `app/page.tsx`는 홈 화면을 조립하는 역할을 합니다. 실제 기능은 각각의 하위 폴더에 분리되어 있어 여러 사람이 동시에 작업하기 쉽습니다.
 
 ## 처음 실행하는 방법
 
-준비물은 VS Code, Git, Node.js 22 이상, pnpm입니다.
+필요 프로그램은 Git, Node.js 22 이상, pnpm입니다.
 
 ```powershell
-npm install -g pnpm
 cd C:\Users\seokj\python\dashboard
 pnpm install
+Copy-Item .env.example .env.local
 pnpm dev
 ```
 
-터미널에 표시되는 `Local` 주소를 브라우저에서 엽니다. 기본 주소는 보통 다음과 같습니다.
+브라우저에서 `http://localhost:3000`을 엽니다. 서버를 종료하려면 실행 중인 터미널에서 `Ctrl + C`를 누릅니다.
 
-```text
-http://localhost:3000
+## 환경 변수
+
+`.env.local`에는 다음 값을 입력합니다.
+
+```dotenv
+NEXT_PUBLIC_SUPABASE_URL=https://프로젝트번호.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
+KAKAO_REST_API_KEY=
 ```
 
-서버를 종료하려면 실행 중인 터미널에서 `Ctrl + C`를 누릅니다.
+`NEXT_PUBLIC_`이 붙은 두 값은 Supabase의 공개용 연결 정보입니다. `KAKAO_REST_API_KEY`는 비밀값이므로 외부에 공개하거나 GitHub에 올리면 안 됩니다. `.env.local`은 `.gitignore`에 포함되어 Git에 올라가지 않습니다.
 
-## 사이트 주소 디버깅 방법
+배포용 공개 연결 정보는 `.env.production`에도 들어 있습니다. 이 파일에는 브라우저에 공개 가능한 Supabase URL과 publishable 키만 넣을 수 있습니다. 카카오 키, Supabase `service_role`, secret 키 등 비밀값은 절대 추가하지 않습니다. Vercel 대시보드 환경 변수로 이전할 때는 `.env.production`의 값과 중복되지 않게 관리합니다.
 
-현재 프로덕션 배포 주소:
+## 공동 저장 동작
 
-```text
-https://wise-tsv-dashboard.vercel.app
-```
+`useSharedCollection`이 다음 컬렉션을 `shared_items` 테이블에 저장합니다.
 
-### 1. 전체 페이지 자동 점검
+- `tsv-notices`: 공지사항
+- `tsv-members`: 멤버와 연차
+- `tsv-schedules`: 근태 일정
+- `tsv-dining-places`: 회식 후보
 
-개발 서버를 실행한 상태에서 새 터미널을 열고 다음 명령을 실행합니다.
+사이트를 처음 열면 이전 버전의 브라우저 `localStorage` 데이터를 발견해 Supabase로 한 번 이전한 뒤 로컬 복사본을 제거합니다. 여러 브라우저가 동시에 열려 있으면 Supabase Realtime으로 변경 내용을 다시 불러옵니다.
+
+## 매우 중요한 보안 안내
+
+현재 요구사항에 따라 SSO와 별도 로그인 없이 사용하도록 구성되어 있습니다. 따라서 사이트 주소를 아는 사람은 데이터를 조회·추가·수정·삭제할 수 있습니다.
+
+- 회사 기밀, 개인정보, 민감한 인사정보는 입력하지 않습니다.
+- 주소를 공개 게시물에 공유하지 않습니다.
+- 정식 사내 운영 전에는 사내 SSO 또는 Supabase Auth를 연결합니다.
+- 인증을 추가할 때 `anon` CRUD 정책을 제거하고 사용자·팀 기반 RLS 정책으로 교체합니다.
+- `service_role` 또는 secret 키를 `NEXT_PUBLIC_` 변수나 프론트엔드 코드에 절대 넣지 않습니다.
+
+## GitHub 작업 방법
+
+작업을 시작하기 전 최신 코드를 받습니다.
 
 ```powershell
-pnpm check:site
+git switch main
+git pull
+git switch -c feature/담당기능
 ```
 
-홈과 다섯 개 페이지의 연결 상태, HTTP 상태 코드, 필수 제목을 자동으로 확인합니다. 모두 정상이면 `모든 페이지 주소가 정상입니다.`라고 표시됩니다.
-
-### 2. Vercel 배포 주소 점검
-
-배포 후 생성된 주소를 명령 뒤에 붙입니다.
+작업 후 검사하고 저장합니다.
 
 ```powershell
-pnpm check:site -- https://내-사이트.vercel.app
-```
-
-현재 사이트는 Vercel의 `wise-tsv-dashboard` 프로젝트에 배포되어 있습니다. 이후 새 기능을 배포하면 같은 대표 주소에 최신 프로덕션 버전이 연결됩니다.
-
-또는 환경변수로 전달할 수 있습니다.
-
-```powershell
-$env:SITE_URL="https://내-사이트.vercel.app"
-pnpm check:site
-```
-
-### 3. 배포 전 코드 검사
-
-```powershell
+pnpm lint
 pnpm build
+git status
+git add .
+git commit -m "변경 내용을 설명하는 한글 메시지"
+git push -u origin feature/담당기능
 ```
 
-빌드가 성공하면 페이지 코드와 자료형 검사를 통과한 것입니다. 자동 점검은 주소와 기본 내용을 확인하고, 실제 버튼 작동과 화면 모양은 브라우저에서 최종 확인합니다.
-
-### 4. 수동 점검표
-
-1. 홈에서 카드 다섯 개를 각각 누른다.
-2. 연결된 페이지의 제목이 선택한 메뉴와 같은지 확인한다.
-3. `메인으로 돌아가기`를 눌러 홈으로 복귀한다.
-4. 각 페이지의 `＋ 추가` 버튼으로 항목을 등록한다.
-5. 새로고침 후 항목이 유지되는지 확인한다.
-6. 삭제 버튼이 해당 항목만 제거하는지 확인한다.
-7. 근태캘린더에서 날짜를 눌러 연차·근무·GY 일정을 등록한다.
-8. 달력의 빨간색 공휴일과 멤버별 잔여 연차가 표시되는지 확인한다.
-9. 브라우저 너비를 줄여 휴대전화 화면에서도 내용이 겹치지 않는지 확인한다.
-
-## 메뉴 추가·수정·숨김·삭제
-
-홈 메뉴는 `app/config/menu.ts`의 `dashboardMenus`에서 관리합니다.
-
-- 이름 변경: `title` 수정
-- 설명 변경: `description` 수정
-- 아이콘 변경: `icon` 수정
-- 임시 숨김: `enabled: false`
-- 다시 표시: `enabled: true`
-
-새 메뉴는 기존 항목을 복사하고 고유한 `id`와 `href`를 지정한 뒤, `app` 아래에 `href`와 같은 이름의 폴더와 `page.tsx`를 만듭니다.
-
-완전히 삭제하기 전에는 먼저 Git 커밋으로 백업하고, 메뉴 설정과 연결된 기능 폴더를 함께 제거합니다.
-
-## 네 명이 함께 개발하는 방법
+4명이 함께 작업할 때 권장 담당 영역:
 
 - 담당자 1: `app/notices`
 - 담당자 2: `app/members`
 - 담당자 3: `app/attendance`
 - 담당자 4: `app/ladder`, `app/dining`
 
-`app/page.tsx`, `app/config/menu.ts`, `app/globals.css`, `app/components`는 공용 영역입니다. 공용 파일 변경은 팀원에게 알리고 Pull Request에서 검토하는 방식을 권장합니다.
+`app/page.tsx`, `app/config`, `app/components`, `app/hooks`, `app/lib`, `app/globals.css`는 공용 영역이므로 수정 전에 팀에 알리고 Pull Request에서 함께 검토합니다.
 
-## Git 백업
+## 메뉴 수정·추가·삭제·백업
+
+메뉴 카드 설정은 `app/config/menu.ts`에 모여 있습니다.
+
+- 이름 변경: `title`
+- 설명 변경: `description`
+- 아이콘 변경: `icon`
+- 페이지 주소 변경: `href`
+- 임시 숨김: `enabled: false`
+- 다시 표시: `enabled: true`
+
+기능을 삭제하기 전에는 새 Git 커밋으로 백업합니다. 새 메뉴를 추가할 때는 설정 항목과 `app/새주소/page.tsx`를 함께 추가합니다.
+
+## 데이터베이스 구조 백업
+
+`supabase/schema.sql`은 현재 데이터베이스의 테이블과 정책을 재현하기 위한 문서입니다. 실제 스키마를 변경하면 이 파일도 같은 커밋에서 수정합니다. 데이터 자체의 정기 백업은 Supabase 대시보드의 백업 기능 또는 SQL 내보내기를 사용합니다.
+
+## 검사와 배포 확인
 
 ```powershell
-git status
-git add .
-git commit -m "변경 내용을 설명하는 한글 메시지"
-git push
+pnpm lint
+pnpm build
+pnpm check:site -- https://wise-tsv-dashboard.vercel.app
 ```
 
-`.env`처럼 비밀 키가 담긴 파일은 GitHub에 올리지 않습니다.
+Vercel이 GitHub의 `main` 브랜치와 연결되어 있으면 `main`에 반영된 커밋이 자동 배포됩니다. 배포 후 공지 하나를 추가하고 다른 브라우저에서 보이는지 확인하면 공동 저장까지 검증할 수 있습니다.
 
-## 공휴일 처리 방식
+## 문제 해결
 
-근태캘린더가 새로운 연도를 보여줄 때 `/api/holidays/연도`를 호출합니다. 서버는 공개 공휴일 API에서 대한민국 공휴일을 받아 일주일 동안 캐시합니다. 외부 공휴일 API가 일시적으로 응답하지 않으면 일반 일정 기능은 계속 사용할 수 있지만 공휴일만 비어 있을 수 있습니다.
-
-회사 창립기념일처럼 사내 휴일이 필요하면 추후 별도의 `company_holidays` 데이터 표를 Supabase에 추가합니다.
-
-## 근무표 사다리 사용 방법
-
-1. `근무표 사다리` 메뉴를 엽니다.
-2. 당첨되는 사람 수를 드롭다운에서 선택합니다.
-3. 다른 형태의 사다리가 필요하면 `새 사다리`를 누릅니다.
-4. `사다리 시작`을 누르면 모든 참가자의 경로가 색상으로 표시됩니다.
-5. 게임이 끝나도 당첨 결과는 숨겨진 상태로 유지됩니다.
-6. `결과 공개`를 누르면 당첨자 이름이 나타납니다.
-7. `결과 공유`를 누르면 휴대전화의 공유창이 열리거나 결과가 클립보드에 복사됩니다.
-
-기본 참가자는 조려진, 류호석, 홍석준, 박종화, 임창선, 김명주, 반고은, 문효민, 신재경, 전인준입니다. `참가자 편집`에서 이름을 추가하거나 삭제할 수 있으며, 변경할 때마다 새로운 사다리가 생성됩니다.
-
-## 다음 개발 순서
-
-1. 현재 화면과 입력 흐름을 팀원들과 검토
-2. GitHub 원격 저장소 연결
-3. Supabase 데이터 표와 보안 정책 생성
-4. 브라우저 저장 기능을 Supabase 공동 저장으로 교체
-5. 공지사항과 일정의 수정 기능 추가
-6. 근무표 사다리 실제 추첨 기능 추가
-7. 회식 장소 투표 기능 추가
-8. Vercel 배포 후 `pnpm check:site -- 배포주소` 실행
-
-## 회식 장소 지도 설정
-
-회식 장소 화면의 기준점은 `경기도 화성시 삼성전자로 1, 삼성전자 화성캠퍼스 H3 Gate`입니다. 한식·중식·일식·양식·기타를 선택하면 해당 음식 종류로 주변 검색이 갱신됩니다.
-
-API 키가 없어도 기준 지도, 네이버지도 검색, 카카오맵 검색과 직접 후보 추가 기능을 사용할 수 있습니다. 사이트 안에서 실제 음식점 목록을 거리순으로 받으려면 다음 순서로 카카오 로컬 API를 연결합니다.
-
-1. `.env.example`을 복사하여 `.env.local` 파일을 만듭니다.
-2. 카카오디벨로퍼스에서 앱을 만들고 REST API 키를 발급합니다.
-3. `.env.local`의 `KAKAO_REST_API_KEY=` 뒤에 키를 입력합니다.
-4. 개발 서버를 다시 시작합니다.
-
-`.env.local`은 비밀정보 파일이므로 Git에 올리지 않습니다. 현재 기준점 좌표는 초기 화면용 근사 좌표이며, 실제 운영 전 H3 Gate의 정확한 핀 위치를 팀에서 한 번 확인한 뒤 `app/dining/DiningFinder.tsx`와 `app/api/restaurants/route.ts`의 좌표를 함께 수정합니다.
+- `gh 명령을 찾을 수 없음`: VS Code와 PowerShell을 완전히 다시 열거나 `C:\Program Files\GitHub CLI\gh.exe`를 직접 실행합니다.
+- `gh token is invalid`: `gh auth login -h github.com`으로 다시 로그인합니다.
+- 데이터가 브라우저마다 다름: Vercel 환경 변수 두 개가 모든 환경에 등록됐는지 확인하고 재배포합니다.
+- `permission denied for table`: Supabase의 `GRANT`와 RLS 정책이 `supabase/schema.sql`과 같은지 확인합니다.
+- 화면은 열리지만 변경이 실시간 반영되지 않음: 새로고침 후 Supabase Realtime에서 `shared_items`가 활성화되어 있는지 확인합니다.
+- 배포 실패: Vercel 빌드 로그에서 첫 번째 오류를 확인하고 로컬에서 `pnpm build`를 다시 실행합니다.
